@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Global Wave & Wind Map | SurferToday</title>
+  <meta name="description" content="Explore measured ocean wave and wind observations from buoys and coastal weather stations around the world.">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root { color-scheme: light; font-family: Arial, Helvetica, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #252525; background: #fff; }
+    .app { max-width: 1500px; margin: 0 auto; padding: 16px; }
+    h1 { margin: 0 0 6px; color: #183b56; font-size: 26px; }
+    .intro { margin: 0 0 16px; color: #59636e; line-height: 1.5; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 12px; background: #f7f8fa; border: 1px solid #e5e7eb; border-bottom: 0; }
+    .toolbar label { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; }
+    .status { margin-left: auto; color: #59636e; font-size: 12px; }
+    #map { width: 100%; height: min(76vh, 780px); min-height: 480px; border: 1px solid #e5e7eb; }
+    .note { padding: 9px 11px; border: 1px solid #e5e7eb; border-top: 0; color: #667085; font-size: 12px; line-height: 1.5; }
+    .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
+    @media (max-width: 600px) { .app { padding: 8px; } h1 { font-size: 22px; } #map { height: 68vh; min-height: 400px; } .status { width: 100%; margin-left: 0; } }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <h1>Global Wave &amp; Wind Map</h1>
+    <p class="intro">Measured ocean-wave and wind conditions from reporting buoys and coastal weather stations.</p>
+    <div class="toolbar">
+      <label><input type="checkbox" id="show-wave" checked> <span class="legend-dot" style="background:#287fb8"></span> Wave observations</label>
+      <label><input type="checkbox" id="show-wind" checked> <span class="legend-dot" style="background:#c58b2a"></span> Wind observations</label>
+      <span id="status" class="status">Preparing station inventory…</span>
+    </div>
+    <div id="map" role="application" aria-label="Global wave and wind observation stations"></div>
+    <div class="note">Observations are measurements reported by individual stations, not forecasts. Availability and update frequency vary by station. All observation times will be displayed in UTC.</div>
+  </main>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map', { worldCopyJump: true }).setView([20, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    document.getElementById('status').textContent =
+      'Map ready — NOAA station inventory is the next step.';
+  </script>
+</body>
+</html>
