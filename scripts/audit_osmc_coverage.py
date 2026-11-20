@@ -30,7 +30,8 @@ def distance_km(lat1, lon1, lat2, lon2):
 def main():
     now = datetime.now(timezone.utc)
     start = now - timedelta(hours=WINDOW_HOURS)
-    query = ",".join(FIELDS) + "&time>=" + start.strftime("%Y-%m-%dT%H:%M:%SZ")
+    query = (",".join(FIELDS) + "&time>=" + start.strftime("%Y-%m-%dT%H:%M:%SZ") +
+             "&time<=" + now.strftime("%Y-%m-%dT%H:%M:%SZ"))
     url = ERDDAP + "?" + urllib.parse.quote(query, safe=",&>:=Z-")
     req = urllib.request.Request(url, headers={"User-Agent": "SurferToday-OSMC-Coverage-Audit/1.0"})
     with urllib.request.urlopen(req, timeout=120) as response:
@@ -49,13 +50,15 @@ def main():
         types[ptype] += 1
         try:
             stamp = datetime.fromisoformat(row["time"].replace("Z", "+00:00"))
+            if stamp.tzinfo is None:
+                stamp = stamp.replace(tzinfo=timezone.utc)
             lat, lon = float(row["latitude"]), float(row["longitude"])
         except (ValueError, TypeError, KeyError):
             continue
         rec = latest.setdefault(code, {
             "platform_code": code, "platform_type": ptype,
             "time": stamp.isoformat(), "latitude": lat, "longitude": lon,
-            "values": {}
+            "values": {}, "value_times": {}
         })
         if stamp > datetime.fromisoformat(rec["time"]):
             rec.update({"time": stamp.isoformat(), "latitude": lat, "longitude": lon,
@@ -64,8 +67,10 @@ def main():
             raw_value = (row.get(field) or "").strip()
             try:
                 value = float(raw_value)
-                if math.isfinite(value):
+                previous = rec["value_times"].get(field)
+                if math.isfinite(value) and (previous is None or stamp > datetime.fromisoformat(previous)):
                     rec["values"][field] = value
+                    rec["value_times"][field] = stamp.isoformat()
             except ValueError:
                 pass
 
