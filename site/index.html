@@ -106,16 +106,13 @@
 
         stationData.stations.forEach(s => {
           const obs = observations[s.id];
-          if (obs && obs.values && Object.keys(obs.values).length) observedCount++;
-          // When live data exists, classify by variables with actual numeric readings.
-          // Inventory flags are only a fallback if this station has no live record.
-          const hasLiveValues = !!(obs && obs.values && Object.keys(obs.values).length);
-          const hasWave = hasLiveValues
-            ? ['WVHT','DPD','APD','MWD'].some(f => Number.isFinite(obs.values[f]))
-            : !!(s.has_wave_feed || s.has_significant_wave_height || s.has_wave_period || s.has_wave_direction || s.has_spectral_wave_feed);
-          const hasWind = hasLiveValues
-            ? ['WSPD','WDIR','GST'].some(f => Number.isFinite(obs.values[f]))
-            : !!(s.has_wind_data || s.has_wind_speed || s.has_wind_direction || s.has_wind_gust);
+          // The consolidated NOAA latest-observations feed contains only reports
+          // less than two hours old. Do not fall back to inventory capability flags:
+          // stations without a fresh report must not appear on this live map.
+          if (!obs || !obs.values || !Object.keys(obs.values).length) return;
+          observedCount++;
+          const hasWave = ['WVHT','DPD','APD','MWD'].some(f => Number.isFinite(obs.values[f]));
+          const hasWind = ['WSPD','WDIR','GST'].some(f => Number.isFinite(obs.values[f]));
           if (!hasWave && !hasWind) return;
           if (hasWave) waveCount++;
           if (hasWind) windCount++;
@@ -132,9 +129,9 @@
           }).bindPopup(popupFor(s, obs)).addTo(visibleLayer);
         });
 
-        status.textContent = stationData.count + ' stations · ' + waveCount + ' with wave feeds · ' +
-          windCount + ' with wind measurements · ' + observedCount + ' with recent observations' +
-          (observationData ? ' · observations updated ' + observationData.generated_at_utc.replace('T',' ').replace('+00:00',' UTC') : ' · live observations not published yet');
+        status.textContent = mapStations.length + ' stations with fresh observations · ' + waveCount +
+          ' with wave measurements · ' + windCount + ' with wind measurements' +
+          (observationData ? ' · feed updated ' + observationData.generated_at_utc.replace('T',' ').replace('+00:00',' UTC') : ' · live observations not published yet');
       } catch (error) {
         status.textContent = error.message;
         console.error(error);
