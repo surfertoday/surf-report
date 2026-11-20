@@ -89,14 +89,18 @@
       html += '<p class="meta latest-report">Latest report: ' + escapeHtml(observationTime(obs && obs.observed_at)) + '</p><a class="source" href="' + escapeHtml(s.station_url) + '" target="_blank" rel="noopener">NOAA station details</a></div>';
       return html;
     }
+    let refreshInProgress = false;
     async function loadMapData() {
+      if (refreshInProgress) return;
+      refreshInProgress = true;
       try {
-        const stationResponse = await fetch('data/stations.json', {cache:'no-store'});
+        const cacheBuster = '?_=' + Date.now();
+        const stationResponse = await fetch('data/stations.json' + cacheBuster, {cache:'no-store'});
         if (!stationResponse.ok) throw new Error('Station inventory unavailable (' + stationResponse.status + ')');
         const stationData = await stationResponse.json();
         let observationData = null;
         try {
-          const response = await fetch('data/observations.json', {cache:'no-store'});
+          const response = await fetch('data/observations.json' + cacheBuster, {cache:'no-store'});
           if (response.ok) observationData = await response.json();
         } catch (e) { console.warn('NOAA live observations not yet available', e); }
 
@@ -119,6 +123,8 @@
           mapStations.push({station:s, observation:obs, hasWave, hasWind});
         });
 
+        // Replace markers only after the latest data has loaded successfully.
+        visibleLayer.clearLayers();
         // Use one consistent marker style for every station with wave or wind capability.
         // The popup identifies which measurements are actually available.
         mapStations.forEach(item => {
@@ -133,11 +139,15 @@
           ' with wave measurements · ' + windCount + ' with wind measurements' +
           (observationData ? ' · feed updated ' + observationData.generated_at_utc.replace('T',' ').replace('+00:00',' UTC') : ' · live observations not published yet');
       } catch (error) {
-        status.textContent = error.message;
+        status.textContent = error.message + ' · retaining previous observations';
         console.error(error);
+      } finally {
+        refreshInProgress = false;
       }
     }
     loadMapData();
+    // Refresh published buoy observations automatically while the map remains open.
+    window.setInterval(loadMapData, 5 * 60 * 1000);
   </script>
 </body>
 </html>
