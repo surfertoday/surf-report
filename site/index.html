@@ -49,8 +49,7 @@
       maxZoom: 18,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-    const waveLayer = L.layerGroup().addTo(map);
-    const windLayer = L.layerGroup().addTo(map);
+    const visibleLayer = L.layerGroup().addTo(map);
     const status = document.getElementById('status');
 
     function escapeHtml(value) {
@@ -102,28 +101,53 @@
           const response = await fetch('data/observations.json', {cache:'no-store'});
           if (response.ok) observationData = await response.json();
         } catch (e) { console.warn('NOAA live observations not yet available', e); }
+
         const observations = observationData && observationData.observations ? observationData.observations : {};
         let waveCount = 0, windCount = 0, observedCount = 0;
+        const mapStations = [];
+
         stationData.stations.forEach(s => {
           const obs = observations[s.id];
           if (obs && obs.values && Object.keys(obs.values).length) observedCount++;
           const hasWave = !!(s.has_wave_feed || s.has_significant_wave_height || s.has_wave_period || s.has_wave_direction || s.has_spectral_wave_feed);
           const hasWind = !!(s.has_wind_data || s.has_wind_speed || s.has_wind_direction || s.has_wind_gust);
           if (!hasWave && !hasWind) return;
-          const marker = L.circleMarker([s.latitude, s.longitude], {
-            radius: 5, weight: 1,
-            color: hasWave ? '#176b9b' : '#a66b12',
-            fillColor: hasWave ? '#287fb8' : '#d5a441',
-            fillOpacity: 0.9
-          }).bindPopup(popupFor(s, obs));
-          if (hasWave) { waveLayer.addLayer(marker); waveCount++; }
-          if (hasWind) { windLayer.addLayer(marker); windCount++; }
+          if (hasWave) waveCount++;
+          if (hasWind) windCount++;
+          mapStations.push({station:s, observation:obs, hasWave, hasWind});
         });
+
+        const waveCheckbox = document.getElementById('show-wave');
+        const windCheckbox = document.getElementById('show-wind');
+
+        // Draw each station once. Wave-only selection is blue; wind-only is yellow.
+        // When both filters are active, wave-capable stations are blue and
+        // wind-only stations are yellow. This avoids duplicate overlapping markers.
+        function renderMarkers() {
+          visibleLayer.clearLayers();
+          const showWave = waveCheckbox.checked;
+          const showWind = windCheckbox.checked;
+          mapStations.forEach(item => {
+            const {station:s, observation:obs, hasWave, hasWind} = item;
+            const visibleAsWave = showWave && hasWave;
+            const visibleAsWind = showWind && hasWind;
+            if (!visibleAsWave && !visibleAsWind) return;
+            const color = visibleAsWave ? '#287fb8' : '#d5a441';
+            const border = visibleAsWave ? '#176b9b' : '#a66b12';
+            L.circleMarker([s.latitude, s.longitude], {
+              radius: 5, weight: 1, color: border,
+              fillColor: color, fillOpacity: 0.9
+            }).bindPopup(popupFor(s, obs)).addTo(visibleLayer);
+          });
+        }
+
+        waveCheckbox.addEventListener('change', renderMarkers);
+        windCheckbox.addEventListener('change', renderMarkers);
+        renderMarkers();
+
         status.textContent = stationData.count + ' stations · ' + waveCount + ' with wave feeds · ' +
           windCount + ' with wind measurements · ' + observedCount + ' with recent observations' +
           (observationData ? ' · observations updated ' + observationData.generated_at_utc.replace('T',' ').replace('+00:00',' UTC') : ' · live observations not published yet');
-        document.getElementById('show-wave').addEventListener('change', e => e.target.checked ? map.addLayer(waveLayer) : map.removeLayer(waveLayer));
-        document.getElementById('show-wind').addEventListener('change', e => e.target.checked ? map.addLayer(windLayer) : map.removeLayer(windLayer));
       } catch (error) {
         status.textContent = error.message;
         console.error(error);
