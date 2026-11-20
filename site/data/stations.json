@@ -2,7 +2,7 @@
   "source": "NOAA National Data Buoy Center (NDBC)",
   "source_metadata": "https://www.ndbc.noaa.gov/activestations.xml",
   "source_realtime_directory": "https://www.ndbc.noaa.gov/data/realtime2/",
-  "generated_at_utc": "2026-11-20T12:15:54+00:00",
+  "generated_at_utc": "2026-11-20T12:16:35+00:00",
   "method": "Active-station XML for station identity and coordinates; current NDBC real-time directory for available .txt and .spec feeds. Meteorological feed availability does not guarantee every wind variable is measured at every station.",
   "count": 359,
   "stations": [
