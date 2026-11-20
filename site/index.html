@@ -41,8 +41,57 @@
       maxZoom: 18,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-    document.getElementById('status').textContent =
-      'Map ready — NOAA station inventory is the next step.';
+
+    const waveLayer = L.layerGroup().addTo(map);
+    const windLayer = L.layerGroup().addTo(map);
+    const status = document.getElementById('status');
+
+    function popupFor(s) {
+      const wave = s.has_wave_feed
+        ? '<p><strong>Wave data feed:</strong> available (.spec)</p>'
+        : '<p><strong>Wave data feed:</strong> not listed</p>';
+      const met = s.has_meteorological_feed
+        ? '<p><strong>Meteorological feed:</strong> recently reported to NDBC</p>'
+        : '<p><strong>Meteorological feed:</strong> not recently reported</p>';
+      return '<strong>' + escapeHtml(s.name) + '</strong>' +
+        '<p>Station: ' + escapeHtml(s.id) + '</p>' + wave + met +
+        '<p><a href="' + s.station_url + '" target="_blank" rel="noopener">NOAA station details</a></p>';
+    }
+
+    function escapeHtml(value) {
+      return String(value || '').replace(/[&<>"']/g, c => ({
+        '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+      }[c]));
+    }
+
+    async function loadStations() {
+      try {
+        const response = await fetch('data/stations.json', { cache: 'no-store' });
+        if (!response.ok) throw new Error('Could not load station inventory (' + response.status + ')');
+        const data = await response.json();
+        let waveCount = 0, windCount = 0;
+        data.stations.forEach(s => {
+          const marker = L.circleMarker([s.latitude, s.longitude], {
+            radius: 5, weight: 1, color: s.has_wave_feed ? '#176b9b' : '#a66b12',
+            fillColor: s.has_wave_feed ? '#287fb8' : '#d5a441', fillOpacity: 0.9
+          }).bindPopup(popupFor(s));
+          if (s.has_wave_feed) { marker.addTo(waveLayer); waveCount++; }
+          else if (s.has_meteorological_feed) { marker.addTo(windLayer); windCount++; }
+        });
+        status.textContent = data.count + ' NOAA stations indexed · ' +
+          waveCount + ' with wave feeds · ' + windCount + ' with meteorological feeds';
+        document.getElementById('show-wave').addEventListener('change', e => {
+          e.target.checked ? map.addLayer(waveLayer) : map.removeLayer(waveLayer);
+        });
+        document.getElementById('show-wind').addEventListener('change', e => {
+          e.target.checked ? map.addLayer(windLayer) : map.removeLayer(windLayer);
+        });
+      } catch (error) {
+        status.textContent = error.message + ' — run the GitHub Actions inventory workflow.';
+        console.error(error);
+      }
+    }
+    loadStations();
   </script>
 </body>
 </html>
