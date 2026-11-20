@@ -18,7 +18,6 @@
     .status { margin-left: auto; color: #59636e; font-size: 12px; }
     #map { width: 100%; height: min(76vh, 780px); min-height: 480px; border: 1px solid #e5e7eb; }
     .note { padding: 9px 11px; border: 1px solid #e5e7eb; border-top: 0; color: #667085; font-size: 12px; line-height: 1.5; }
-    .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; }
     .station-popup { min-width: 220px; }
     .station-popup h3 { margin: 0 0 5px; color: #183b56; font-size: 15px; }
     .station-popup .meta { margin: 0 0 8px; color: #667085; font-size: 11px; }
@@ -35,8 +34,6 @@
     <h1>Global Wave &amp; Wind Map</h1>
     <p class="intro">Measured ocean-wave and wind conditions from reporting buoys and coastal weather stations.</p>
     <div class="toolbar">
-      <label><input type="checkbox" id="show-wave" checked> <span class="legend-dot" style="background:#287fb8"></span> Wave observations</label>
-      <label><input type="checkbox" id="show-wind" checked> <span class="legend-dot" style="background:#c58b2a"></span> Wind observations</label>
       <span id="status" class="status">Loading NOAA station inventory…</span>
     </div>
     <div id="map" role="application" aria-label="Global wave and wind observation stations"></div>
@@ -124,33 +121,15 @@
           mapStations.push({station:s, observation:obs, hasWave, hasWind});
         });
 
-        const waveCheckbox = document.getElementById('show-wave');
-        const windCheckbox = document.getElementById('show-wind');
-
-        // Draw each station once. Wave-only selection is blue; wind-only is yellow.
-        // When both filters are active, wave-capable stations are blue and
-        // wind-only stations are yellow. This avoids duplicate overlapping markers.
-        function renderMarkers() {
-          visibleLayer.clearLayers();
-          const showWave = waveCheckbox.checked;
-          const showWind = windCheckbox.checked;
-          mapStations.forEach(item => {
-            const {station:s, observation:obs, hasWave, hasWind} = item;
-            const visibleAsWave = showWave && hasWave;
-            const visibleAsWind = showWind && hasWind;
-            if (!visibleAsWave && !visibleAsWind) return;
-            const color = visibleAsWave ? '#287fb8' : '#d5a441';
-            const border = visibleAsWave ? '#176b9b' : '#a66b12';
-            L.circleMarker([s.latitude, s.longitude], {
-              radius: 5, weight: 1, color: border,
-              fillColor: color, fillOpacity: 0.9
-            }).bindPopup(popupFor(s, obs)).addTo(visibleLayer);
-          });
-        }
-
-        waveCheckbox.addEventListener('change', renderMarkers);
-        windCheckbox.addEventListener('change', renderMarkers);
-        renderMarkers();
+        // Use one consistent marker style for every station with wave or wind capability.
+        // The popup identifies which measurements are actually available.
+        mapStations.forEach(item => {
+          const {station:s, observation:obs} = item;
+          L.circleMarker([s.latitude, s.longitude], {
+            radius: 5, weight: 1, color: '#176b9b',
+            fillColor: '#287fb8', fillOpacity: 0.9
+          }).bindPopup(popupFor(s, obs)).addTo(visibleLayer);
+        });
 
         status.textContent = stationData.count + ' stations · ' + waveCount + ' with wave feeds · ' +
           windCount + ' with wind measurements · ' + observedCount + ' with recent observations' +
