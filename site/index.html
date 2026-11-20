@@ -48,11 +48,11 @@
 
     function popupFor(s) {
       const wave = s.has_wave_feed
-        ? '<p><strong>Wave data feed:</strong> available (.spec)</p>'
+        ? '<p><strong>Wave variables:</strong> ' + escapeHtml((s.wave_variables || []).join(', ') || (s.has_spectral_wave_feed ? 'Spectral feed available' : 'None identified')) + '</p>'
         : '<p><strong>Wave data feed:</strong> not listed</p>';
-      const met = s.has_meteorological_feed
-        ? '<p><strong>Meteorological feed:</strong> recently reported to NDBC</p>'
-        : '<p><strong>Meteorological feed:</strong> not recently reported</p>';
+      const met = s.has_wind_data
+        ? '<p><strong>Wind variables:</strong> ' + escapeHtml((s.wind_variables || []).join(', ')) + '</p>'
+        : '<p><strong>Wind variables:</strong> none identified in standard feed</p>';
       return '<strong>' + escapeHtml(s.name) + '</strong>' +
         '<p>Station: ' + escapeHtml(s.id) + '</p>' + wave + met +
         '<p><a href="' + s.station_url + '" target="_blank" rel="noopener">NOAA station details</a></p>';
@@ -79,7 +79,7 @@
           if (s.has_meteorological_feed) { windLayer.addLayer(marker); windCount++; }
         });
         status.textContent = data.count + ' NOAA stations indexed · ' +
-          waveCount + ' with wave feeds · ' + windCount + ' with recent meteorological reports';
+          waveCount + ' with wave feeds · ' + windCount + ' with wind variables identified';
         document.getElementById('show-wave').addEventListener('change', e => {
           e.target.checked ? map.addLayer(waveLayer) : map.removeLayer(waveLayer);
         });
