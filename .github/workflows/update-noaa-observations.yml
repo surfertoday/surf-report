@@ -1,0 +1,33 @@
+name: Update NOAA live observations
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "*/30 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-observations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Fetch latest NOAA observations
+        run: python scripts/build_noaa_observations.py
+      - name: Commit observations if changed
+        run: |
+          if git diff --quiet -- site/data/observations.json; then
+            echo "Observations unchanged."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/data/observations.json
+          git commit -m "Update NOAA live observations"
+          git push
