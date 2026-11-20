@@ -109,8 +109,15 @@
         stationData.stations.forEach(s => {
           const obs = observations[s.id];
           if (obs && obs.values && Object.keys(obs.values).length) observedCount++;
-          const hasWave = !!(s.has_wave_feed || s.has_significant_wave_height || s.has_wave_period || s.has_wave_direction || s.has_spectral_wave_feed);
-          const hasWind = !!(s.has_wind_data || s.has_wind_speed || s.has_wind_direction || s.has_wind_gust);
+          // When live data exists, classify by variables with actual numeric readings.
+          // Inventory flags are only a fallback if this station has no live record.
+          const hasLiveValues = !!(obs && obs.values && Object.keys(obs.values).length);
+          const hasWave = hasLiveValues
+            ? ['WVHT','DPD','APD','MWD'].some(f => Number.isFinite(obs.values[f]))
+            : !!(s.has_wave_feed || s.has_significant_wave_height || s.has_wave_period || s.has_wave_direction || s.has_spectral_wave_feed);
+          const hasWind = hasLiveValues
+            ? ['WSPD','WDIR','GST'].some(f => Number.isFinite(obs.values[f]))
+            : !!(s.has_wind_data || s.has_wind_speed || s.has_wind_direction || s.has_wind_gust);
           if (!hasWave && !hasWind) return;
           if (hasWave) waveCount++;
           if (hasWind) windCount++;
