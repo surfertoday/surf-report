@@ -16,6 +16,80 @@ UNITS = {
 }
 
 
+def parse_stamp(row):
+    year = int(row.get("YY", row.get("YYYY", "0")))
+    if year < 100:
+        year += 2000
+    return datetime(
+        year, int(row["MM"]), int(row["DD"]),
+        int(row["hh"]), int(row["mm"]), tzinfo=timezone.utc
+    )
+
+
+def fetch_station_supplement(station_id):
+    """Fetch the individual NDBC realtime2 file for a priority station."""
+    url = f"https://www.ndbc.noaa.gov/data/realtime2/{station_id}.txt"
+    request = urllib.request.Request(
+        url, headers={"User-Agent": "SurferToday-SurfReport/1.0"}
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=15) as response:
+            lines = response.read().decode("utf-8", "replace").splitlines()
+    except Exception as exc:
+        print(f"Supplemental feed unavailable for {station_id}: {exc}")
+        return None
+
+    header = None
+    newest = None
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        if line.startswith("#"):
+            candidate = line.lstrip("#").split()
+            if "YY" in candidate and "MM" in candidate and "hh" in candidate:
+                header = candidate
+            continue
+        if not header:
+            continue
+        parts = line.split()
+        if len(parts) < len(header):
+            continue
+        row = dict(zip(header, parts))
+        try:
+            stamp = parse_stamp(row)
+        except (ValueError, TypeError, KeyError):
+            continue
+        values, value_units = {}, {}
+        for field in FIELDS:
+            raw = row.get(field, "").strip()
+            if not raw or raw in MISSING:
+                continue
+            try:
+                values[field] = float(raw)
+                value_units[field] = UNITS[field]
+            except ValueError:
+                continue
+        if values and (newest is None or stamp > newest["stamp"]):
+            newest = {"stamp": stamp, "values": values, "units": value_units}
+
+    if newest is None:
+        return None
+    stamp = newest["stamp"]
+    stamp_obj = {
+        "YY": f"{stamp.year:04d}", "MM": f"{stamp.month:02d}",
+        "DD": f"{stamp.day:02d}", "hh": f"{stamp.hour:02d}",
+        "mm": f"{stamp.minute:02d}"
+    }
+    return {
+        "station_id": station_id, "observed_at": stamp_obj,
+        "value_times": {field: stamp_obj for field in newest["values"]},
+        "values": newest["values"], "units": newest["units"],
+        "fields": sorted(newest["values"]),
+        "source_url": url
+    }
+
+
 def main():
     with open(STATIONS, encoding="utf-8") as f:
         station_data = json.load(f)
@@ -81,7 +155,7 @@ def main():
             "source_url": SOURCE_URL
         }
 
-    output = {
+    # The consolidated feed can lag the individual station file. Check this\n    # priority station independently and keep whichever report is newer.\n    for sid in ("46053",):\n        supplemental = fetch_station_supplement(sid)\n        if supplemental:\n            current = results.get(sid)\n            try:\n                current_stamp = parse_stamp(current["observed_at"]) if current else None\n                new_stamp = parse_stamp(supplemental["observed_at"])\n            except (ValueError, TypeError, KeyError):\n                current_stamp = None\n                new_stamp = None\n            if current is None or (new_stamp and current_stamp and new_stamp > current_stamp):\n                results[sid] = supplemental\n                print(f"Using newer individual-station report for {sid}: {supplemental['observed_at']}")\n\n    output = {
         "source": "NOAA National Data Buoy Center (NDBC) latest observations",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "station_count": len(station_data["stations"]),
