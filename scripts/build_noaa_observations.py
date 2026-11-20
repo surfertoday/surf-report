@@ -155,7 +155,23 @@ def main():
             "source_url": SOURCE_URL
         }
 
-    # The consolidated feed can lag the individual station file. Check this\n    # priority station independently and keep whichever report is newer.\n    for sid in ("46053",):\n        supplemental = fetch_station_supplement(sid)\n        if supplemental:\n            current = results.get(sid)\n            try:\n                current_stamp = parse_stamp(current["observed_at"]) if current else None\n                new_stamp = parse_stamp(supplemental["observed_at"])\n            except (ValueError, TypeError, KeyError):\n                current_stamp = None\n                new_stamp = None\n            if current is None or (new_stamp and current_stamp and new_stamp > current_stamp):\n                results[sid] = supplemental\n                print(f"Using newer individual-station report for {sid}: {supplemental['observed_at']}")\n\n    output = {
+    # The consolidated feed can lag the individual station file. Check this
+    # priority station independently and keep whichever report is newer.
+    for sid in ("46053",):
+        supplemental = fetch_station_supplement(sid)
+        if supplemental:
+            current = results.get(sid)
+            try:
+                current_stamp = parse_stamp(current["observed_at"]) if current else None
+                new_stamp = parse_stamp(supplemental["observed_at"])
+            except (ValueError, TypeError, KeyError):
+                current_stamp = None
+                new_stamp = None
+            if current is None or (new_stamp and current_stamp and new_stamp > current_stamp):
+                results[sid] = supplemental
+                print(f"Using newer individual-station report for {sid}: {supplemental['observed_at']}")
+
+    output = {
         "source": "NOAA National Data Buoy Center (NDBC) latest observations",
         "generated_at_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "station_count": len(station_data["stations"]),
