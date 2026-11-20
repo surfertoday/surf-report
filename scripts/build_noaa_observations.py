@@ -167,9 +167,43 @@ def main():
             except (ValueError, TypeError, KeyError):
                 current_stamp = None
                 new_stamp = None
-            if current is None or (new_stamp and current_stamp and new_stamp > current_stamp):
+            if current is None:
                 results[sid] = supplemental
-                print(f"Using newer individual-station report for {sid}: {supplemental['observed_at']}")
+            elif new_stamp and (current_stamp is None or new_stamp > current_stamp):
+                # Merge by variable, not by whole station record. A newer
+                # meteorological row may omit wave fields that remain valid
+                # in the consolidated feed.
+                merged = current
+                merged_values = dict(current.get("values", {}))
+                merged_units = dict(current.get("units", {}))
+                merged_times = dict(current.get("value_times", {}))
+                for field, value in supplemental.get("values", {}).items():
+                    existing_time = merged_times.get(field)
+                    try:
+                        existing_stamp = parse_stamp(existing_time) if existing_time else None
+                    except (ValueError, TypeError, KeyError):
+                        existing_stamp = None
+                    field_stamp = parse_stamp(supplemental["value_times"][field])
+                    if existing_stamp is None or field_stamp > existing_stamp:
+                        merged_values[field] = value
+                        merged_units[field] = supplemental["units"][field]
+                        merged_times[field] = supplemental["value_times"][field]
+
+                latest_stamp = max(parse_stamp(t) for t in merged_times.values())
+                merged["values"] = merged_values
+                merged["units"] = merged_units
+                merged["value_times"] = merged_times
+                merged["fields"] = sorted(merged_values)
+                merged["observed_at"] = {
+                    "YY": f"{latest_stamp.year:04d}",
+                    "MM": f"{latest_stamp.month:02d}",
+                    "DD": f"{latest_stamp.day:02d}",
+                    "hh": f"{latest_stamp.hour:02d}",
+                    "mm": f"{latest_stamp.minute:02d}"
+                }
+                merged["source_url"] = "NOAA consolidated and individual station feeds"
+                results[sid] = merged
+                print(f"Merged newest individual-station values for {sid}: {supplemental['observed_at']}")
 
     output = {
         "source": "NOAA National Data Buoy Center (NDBC) latest observations",
