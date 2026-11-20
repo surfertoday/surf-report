@@ -21,7 +21,7 @@
     .station-popup { min-width: 220px; }
     .station-popup h3 { margin: 0 0 5px; color: #183b56; font-size: 15px; }
     .station-popup .meta { margin: 0 0 8px; color: #667085; font-size: 11px; }
-    .station-popup .latest-report { margin-top: 14px; }
+    .station-popup .meta.observed-time { margin: 8px 0 0; }
     .station-popup table { width: 100%; border-collapse: collapse; font-size: 12px; }
     .station-popup td { padding: 4px 2px; border-bottom: 1px solid #edf0f2; }
     .station-popup td:last-child { text-align: right; font-weight: 600; white-space: nowrap; }
@@ -88,7 +88,7 @@
           }, null);
           html += '<div class="section">' + title + '</div><table>' + available.map(f =>
             '<tr><td>' + labels[f] + '</td><td>' + formatValue(f, values[f]) + '</td></tr>').join('') + '</table>';
-          html += '<p class="meta">Observed: ' + escapeHtml(observationTime(latest || (obs && obs.observed_at))) + '</p>';
+          html += '<p class="meta observed-time">Observed: ' + escapeHtml(observationTime(latest || (obs && obs.observed_at))) + '</p>';
         }
       });
       if (!any) html += '<p>No recent numeric observations available. Check the station details for reporting status.</p>';
