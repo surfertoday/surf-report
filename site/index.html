@@ -37,7 +37,7 @@
     <div class="toolbar">
       <label><input type="checkbox" id="show-wave" checked> <span class="legend-dot" style="background:#287fb8"></span> Wave observations</label>
       <label><input type="checkbox" id="show-wind" checked> <span class="legend-dot" style="background:#c58b2a"></span> Wind observations</label>
-      <span id="status" class="status">Loading NOAA observations…</span>
+      <span id="status" class="status">Loading NOAA station inventory…</span>
     </div>
     <div id="map" role="application" aria-label="Global wave and wind observation stations"></div>
     <div class="note">Measurements are observations, not forecasts. Values are taken from the latest available NOAA real-time station reports; reporting intervals vary. Observation timestamps are UTC. Missing measurements are not shown as zero.</div>
@@ -49,7 +49,6 @@
       maxZoom: 18,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-
     const waveLayer = L.layerGroup().addTo(map);
     const windLayer = L.layerGroup().addTo(map);
     const status = document.getElementById('status');
@@ -59,100 +58,74 @@
         '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
       }[c]));
     }
-
     function observationTime(stamp) {
       if (!stamp || !stamp.YY) return 'Time unavailable';
       const year = Number(stamp.YY) < 100 ? 2000 + Number(stamp.YY) : Number(stamp.YY);
-      const month = String(stamp.MM || '01').padStart(2, '0');
-      const day = String(stamp.DD || '01').padStart(2, '0');
-      const hour = String(stamp.hh || '00').padStart(2, '0');
-      const minute = String(stamp.mm || '00').padStart(2, '0');
-      return year + '-' + month + '-' + day + ' ' + hour + ':' + minute + ' UTC';
+      return year + '-' + String(stamp.MM || '01').padStart(2,'0') + '-' +
+        String(stamp.DD || '01').padStart(2,'0') + ' ' +
+        String(stamp.hh || '00').padStart(2,'0') + ':' +
+        String(stamp.mm || '00').padStart(2,'0') + ' UTC';
     }
-
-    const labels = {
-      WVHT: 'Significant wave height',
-      DPD: 'Dominant wave period',
-      APD: 'Average wave period',
-      MWD: 'Mean wave direction',
-      WSPD: 'Wind speed',
-      WDIR: 'Wind direction',
-      GST: 'Wind gust',
-      WTMP: 'Sea temperature',
-      ATMP: 'Air temperature',
-      PRES: 'Atmospheric pressure'
-    };
-
-    function formatValue(field, value, unit) {
-      let suffix = unit || '';
-      if (field === 'MWD' || field === 'WDIR') suffix = '°';
-      if (field === 'WVHT') suffix = ' m';
-      if (field === 'DPD' || field === 'APD') suffix = ' s';
-      if (field === 'WSPD' || field === 'GST') suffix = ' m/s';
-      if (field === 'WTMP' || field === 'ATMP') suffix = ' °C';
-      if (field === 'PRES') suffix = ' hPa';
+    const labels = {WVHT:'Significant wave height',DPD:'Dominant wave period',APD:'Average wave period',MWD:'Mean wave direction',WSPD:'Wind speed',WDIR:'Wind direction',GST:'Wind gust',WTMP:'Sea temperature',ATMP:'Air temperature',PRES:'Atmospheric pressure'};
+    function formatValue(field, value) {
+      const suffix = ({WVHT:' m',DPD:' s',APD:' s',MWD:'°',WSPD:' m/s',WDIR:'°',GST:' m/s',WTMP:' °C',ATMP:' °C',PRES:' hPa'})[field] || '';
       return Number(value).toFixed(1) + suffix;
     }
-
     function popupFor(s, obs) {
-      const v = obs && obs.values ? obs.values : {};
-      const units = obs && obs.units ? obs.units : {};
-      const waveFields = ['WVHT', 'DPD', 'APD', 'MWD'];
-      const windFields = ['WSPD', 'WDIR', 'GST'];
-      const otherFields = ['WTMP', 'ATMP', 'PRES'];
-      function rows(fields) {
-        return fields.filter(f => v[f] !== undefined).map(f =>
-          '<tr><td>' + labels[f] + '</td><td>' + formatValue(f, v[f], units[f]) + '</td></tr>'
-        ).join('');
-      }
-      let html = '<div class="station-popup"><h3>' + escapeHtml(s.name || s.id) + '</h3>' +
-        '<p class="meta">NOAA station ' + escapeHtml(s.id) + '</p>';
-      if (rows(waveFields)) html += '<div class="section">WAVE CONDITIONS</div><table>' + rows(waveFields) + '</table>';
-      if (rows(windFields)) html += '<div class="section">WIND CONDITIONS</div><table>' + rows(windFields) + '</table>';
-      if (rows(otherFields)) html += '<div class="section">OTHER MEASUREMENTS</div><table>' + rows(otherFields) + '</table>';
-      if (!Object.keys(v).length) html += '<p>No recent numeric observations available.</p>';
-      html += '<p class="meta">Latest report: ' + escapeHtml(observationTime(obs && obs.observed_at)) + '</p>' +
-        '<a class="source" href="' + escapeHtml(s.station_url) + '" target="_blank" rel="noopener">NOAA station details</a></div>';
+      const values = obs && obs.values ? obs.values : {};
+      const groups = [
+        ['WAVE CONDITIONS',['WVHT','DPD','APD','MWD']],
+        ['WIND CONDITIONS',['WSPD','WDIR','GST']],
+        ['OTHER MEASUREMENTS',['WTMP','ATMP','PRES']]
+      ];
+      let html = '<div class="station-popup"><h3>' + escapeHtml(s.name || s.id) + '</h3><p class="meta">NOAA station ' + escapeHtml(s.id) + '</p>';
+      let any = false;
+      groups.forEach(([title, fields]) => {
+        const available = fields.filter(f => values[f] !== undefined && values[f] !== null);
+        if (available.length) {
+          any = true;
+          html += '<div class="section">' + title + '</div><table>' + available.map(f =>
+            '<tr><td>' + labels[f] + '</td><td>' + formatValue(f, values[f]) + '</td></tr>').join('') + '</table>';
+        }
+      });
+      if (!any) html += '<p>No recent numeric observations available. Check the station details for reporting status.</p>';
+      html += '<p class="meta">Latest report: ' + escapeHtml(observationTime(obs && obs.observed_at)) + '</p><a class="source" href="' + escapeHtml(s.station_url) + '" target="_blank" rel="noopener">NOAA station details</a></div>';
       return html;
     }
-
     async function loadMapData() {
       try {
-        const [stationResponse, observationResponse] = await Promise.all([
-          fetch('data/stations.json', { cache: 'no-store' }),
-          fetch('data/observations.json', { cache: 'no-store' })
-        ]);
+        const stationResponse = await fetch('data/stations.json', {cache:'no-store'});
         if (!stationResponse.ok) throw new Error('Station inventory unavailable (' + stationResponse.status + ')');
-        if (!observationResponse.ok) throw new Error('Live observations not published yet (' + observationResponse.status + ')');
         const stationData = await stationResponse.json();
-        const observationData = await observationResponse.json();
-        const observations = observationData.observations || {};
+        let observationData = null;
+        try {
+          const response = await fetch('data/observations.json', {cache:'no-store'});
+          if (response.ok) observationData = await response.json();
+        } catch (e) { console.warn('NOAA live observations not yet available', e); }
+        const observations = observationData && observationData.observations ? observationData.observations : {};
         let waveCount = 0, windCount = 0, observedCount = 0;
         stationData.stations.forEach(s => {
           const obs = observations[s.id];
           if (obs && obs.values && Object.keys(obs.values).length) observedCount++;
+          const hasWave = !!(s.has_wave_feed || s.has_significant_wave_height || s.has_wave_period || s.has_wave_direction || s.has_spectral_wave_feed);
+          const hasWind = !!(s.has_wind_data || s.has_wind_speed || s.has_wind_direction || s.has_wind_gust);
+          if (!hasWave && !hasWind) return;
           const marker = L.circleMarker([s.latitude, s.longitude], {
-            radius: 5,
-            weight: 1,
-            color: s.has_significant_wave_height ? '#176b9b' : '#a66b12',
-            fillColor: s.has_significant_wave_height ? '#287fb8' : '#d5a441',
+            radius: 5, weight: 1,
+            color: hasWave ? '#176b9b' : '#a66b12',
+            fillColor: hasWave ? '#287fb8' : '#d5a441',
             fillOpacity: 0.9
           }).bindPopup(popupFor(s, obs));
-          if (s.has_wave_feed) { waveLayer.addLayer(marker); waveCount++; }
-          if (s.has_wind_data) { windLayer.addLayer(marker); windCount++; }
+          if (hasWave) { waveLayer.addLayer(marker); waveCount++; }
+          if (hasWind) { windLayer.addLayer(marker); windCount++; }
         });
-        status.textContent = stationData.count + ' stations · ' + waveCount +
-          ' with wave data · ' + windCount + ' with wind data · ' +
-          observedCount + ' with recent observations · updated ' +
-          observationData.generated_at_utc.replace('T', ' ').replace('+00:00', ' UTC');
-        document.getElementById('show-wave').addEventListener('change', e => {
-          e.target.checked ? map.addLayer(waveLayer) : map.removeLayer(waveLayer);
-        });
-        document.getElementById('show-wind').addEventListener('change', e => {
-          e.target.checked ? map.addLayer(windLayer) : map.removeLayer(windLayer);
-        });
+        status.textContent = stationData.count + ' stations · ' + waveCount + ' with wave feeds · ' +
+          windCount + ' with wind measurements · ' + observedCount + ' with recent observations' +
+          (observationData ? ' · observations updated ' + observationData.generated_at_utc.replace('T',' ').replace('+00:00',' UTC') : ' · live observations not published yet');
+        document.getElementById('show-wave').addEventListener('change', e => e.target.checked ? map.addLayer(waveLayer) : map.removeLayer(waveLayer));
+        document.getElementById('show-wind').addEventListener('change', e => e.target.checked ? map.addLayer(windLayer) : map.removeLayer(windLayer));
       } catch (error) {
-        status.textContent = error.message + ' — check the NOAA observations workflow.';
+        status.textContent = error.message;
         console.error(error);
       }
     }
