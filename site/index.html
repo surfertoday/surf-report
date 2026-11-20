@@ -104,7 +104,8 @@
           if (response.ok) observationData = await response.json();
         } catch (e) { console.warn('NOAA live observations not yet available', e); }
 
-        const observations = observationData && observationData.observations ? observationData.observations : {};
+        if (!observationData || !observationData.observations) throw new Error('NOAA observations unavailable');
+        const observations = observationData.observations;
         let waveCount = 0, windCount = 0, observedCount = 0;
         const mapStations = [];
 
