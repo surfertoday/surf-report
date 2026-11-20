@@ -97,7 +97,7 @@ def main():
     }
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
-        f.write("\\n")
+        f.write("\n")
     print(f"Saved observations for {len(results)} stations")
     print(f"Stations with current WVHT: {sum('WVHT' in o.get('values', {}) for o in results.values())}")
     print(f"Stations with current wind speed: {sum('WSPD' in o.get('values', {}) for o in results.values())}")
