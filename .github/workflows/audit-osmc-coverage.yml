@@ -1,0 +1,29 @@
+name: Audit OSMC global buoy coverage
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  audit-osmc:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Query recent OSMC observations
+        run: python scripts/audit_osmc_coverage.py
+      - name: Commit coverage report
+        run: |
+          git add site/data/osmc_coverage_report.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Add OSMC coverage audit report" || echo "No report changes to commit"
+          git push origin HEAD:main
