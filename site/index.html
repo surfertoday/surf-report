@@ -21,6 +21,7 @@
     .station-popup { min-width: 220px; }
     .station-popup h3 { margin: 0 0 5px; color: #183b56; font-size: 15px; }
     .station-popup .meta { margin: 0 0 8px; color: #667085; font-size: 11px; }
+    .station-popup .latest-report { margin-top: 14px; }
     .station-popup table { width: 100%; border-collapse: collapse; font-size: 12px; }
     .station-popup td { padding: 4px 2px; border-bottom: 1px solid #edf0f2; }
     .station-popup td:last-child { text-align: right; font-weight: 600; white-space: nowrap; }
@@ -85,7 +86,7 @@
         }
       });
       if (!any) html += '<p>No recent numeric observations available. Check the station details for reporting status.</p>';
-      html += '<p class="meta">Latest report: ' + escapeHtml(observationTime(obs && obs.observed_at)) + '</p><a class="source" href="' + escapeHtml(s.station_url) + '" target="_blank" rel="noopener">NOAA station details</a></div>';
+      html += '<p class="meta latest-report">Latest report: ' + escapeHtml(observationTime(obs && obs.observed_at)) + '</p><a class="source" href="' + escapeHtml(s.station_url) + '" target="_blank" rel="noopener">NOAA station details</a></div>';
       return html;
     }
     async function loadMapData() {
