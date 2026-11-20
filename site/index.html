@@ -81,12 +81,18 @@
         const available = fields.filter(f => values[f] !== undefined && values[f] !== null);
         if (available.length) {
           any = true;
+          const times = available.map(f => obs && obs.value_times && obs.value_times[f]).filter(Boolean);
+          const latest = times.reduce((best, stamp) => {
+            const key = stamp => [stamp.YY, stamp.MM, stamp.DD, stamp.hh, stamp.mm].map(v => String(v || '').padStart(2, '0')).join('');
+            return !best || key(stamp) > key(best) ? stamp : best;
+          }, null);
           html += '<div class="section">' + title + '</div><table>' + available.map(f =>
             '<tr><td>' + labels[f] + '</td><td>' + formatValue(f, values[f]) + '</td></tr>').join('') + '</table>';
+          html += '<p class="meta">Observed: ' + escapeHtml(observationTime(latest || (obs && obs.observed_at))) + '</p>';
         }
       });
       if (!any) html += '<p>No recent numeric observations available. Check the station details for reporting status.</p>';
-      html += '<p class="meta latest-report">Latest report: ' + escapeHtml(observationTime(obs && obs.observed_at)) + '</p><a class="source" href="' + escapeHtml(s.station_url) + '" target="_blank" rel="noopener">NOAA station details</a></div>';
+      html += '<a class="source" href="' + escapeHtml(s.station_url) + '" target="_blank" rel="noopener">NOAA station details</a></div>';
       return html;
     }
     let refreshInProgress = false;
