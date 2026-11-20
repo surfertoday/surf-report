@@ -28,7 +28,7 @@
     <p class="intro">Measured ocean-wave and wind conditions from reporting buoys and coastal weather stations.</p>
     <div class="toolbar">
       <label><input type="checkbox" id="show-wave" checked> <span class="legend-dot" style="background:#287fb8"></span> Wave observations</label>
-      <label><input type="checkbox" id="show-wind" checked> <span class="legend-dot" style="background:#c58b2a"></span> Wind observations</label>
+      <label><input type="checkbox" id="show-wind" checked> <span class="legend-dot" style="background:#c58b2a"></span> Wind / met stations</label>
       <span id="status" class="status">Preparing station inventory…</span>
     </div>
     <div id="map" role="application" aria-label="Global wave and wind observation stations"></div>
@@ -75,11 +75,11 @@
             radius: 5, weight: 1, color: s.has_wave_feed ? '#176b9b' : '#a66b12',
             fillColor: s.has_wave_feed ? '#287fb8' : '#d5a441', fillOpacity: 0.9
           }).bindPopup(popupFor(s));
-          if (s.has_wave_feed) { marker.addTo(waveLayer); waveCount++; }
-          else if (s.has_meteorological_feed) { marker.addTo(windLayer); windCount++; }
+          if (s.has_wave_feed) { waveLayer.addLayer(marker); waveCount++; }
+          if (s.has_meteorological_feed) { windLayer.addLayer(marker); windCount++; }
         });
         status.textContent = data.count + ' NOAA stations indexed · ' +
-          waveCount + ' with wave feeds · ' + windCount + ' with meteorological feeds';
+          waveCount + ' with wave feeds · ' + windCount + ' with recent meteorological reports';
         document.getElementById('show-wave').addEventListener('change', e => {
           e.target.checked ? map.addLayer(waveLayer) : map.removeLayer(waveLayer);
         });
