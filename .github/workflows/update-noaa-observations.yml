@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: main
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -22,12 +24,12 @@ jobs:
         run: python scripts/build_noaa_observations.py
       - name: Commit observations if changed
         run: |
-          if git diff --quiet -- site/data/observations.json; then
+          git add site/data/observations.json
+          if git diff --cached --quiet; then
             echo "Observations unchanged."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add site/data/observations.json
           git commit -m "Update NOAA live observations"
-          git push
+          git push origin HEAD:main
