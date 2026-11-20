@@ -91,7 +91,7 @@ def main():
     }
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
-        f.write("\\n")
+        f.write("\n")
 
     print(f"Saved fresh observations for {len(results)} stations")
     print(f"Stations with WVHT: {sum('WVHT' in o['values'] for o in results.values())}")
