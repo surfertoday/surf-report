@@ -2,7 +2,7 @@
   "source": "NOAA National Data Buoy Center (NDBC)",
   "source_metadata": "https://www.ndbc.noaa.gov/activestations.xml",
   "source_realtime_directory": "https://www.ndbc.noaa.gov/data/realtime2/",
-  "generated_at_utc": "2026-11-20T12:21:55+00:00",
+  "generated_at_utc": "2026-11-20T20:26:29+00:00",
   "method": "Active-station XML provides station coordinates. Variable availability is based on numeric, non-missing readings in the last 12 records of each current real-time .txt feed. Spectral .spec availability is recorded separately. This indicates recent observed values, not guaranteed continuous sensor availability.",
   "count": 359,
   "stations": [
@@ -1448,7 +1448,7 @@
       "id": "46082",
       "name": "Cape Suckling - 35 NM SE of Kayak Is, AK",
       "owner": "NDBC",
-      "latitude": 59.6447,
+      "latitude": 59.6456,
       "longitude": -147.953,
       "has_wave_feed": true,
       "has_significant_wave_height": true,
@@ -5749,7 +5749,7 @@
       ],
       "has_spectral_wave_feed": false,
       "has_standard_feed": true,
-      "recent_rows_checked": 8,
+      "recent_rows_checked": 12,
       "source": "NOAA NDBC",
       "station_url": "https://www.ndbc.noaa.gov/station_page.php?station=46184",
       "observations_url": "https://www.ndbc.noaa.gov/data/realtime2/46184.txt"
@@ -9848,7 +9848,7 @@
       ],
       "has_spectral_wave_feed": false,
       "has_standard_feed": true,
-      "recent_rows_checked": 11,
+      "recent_rows_checked": 12,
       "source": "NOAA NDBC",
       "station_url": "https://www.ndbc.noaa.gov/station_page.php?station=46204",
       "observations_url": "https://www.ndbc.noaa.gov/data/realtime2/46204.txt"
