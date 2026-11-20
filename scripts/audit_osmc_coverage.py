@@ -30,9 +30,10 @@ def distance_km(lat1, lon1, lat2, lon2):
 def main():
     now = datetime.now(timezone.utc)
     start = now - timedelta(hours=WINDOW_HOURS)
-    query = (",".join(FIELDS) + "&time>=" + start.strftime("%Y-%m-%dT%H:%M:%SZ") +
-             "&time<=" + now.strftime("%Y-%m-%dT%H:%M:%SZ"))
-    url = ERDDAP + "?" + urllib.parse.quote(query, safe=",&>:=Z-")
+    query = (",".join(FIELDS) +
+             "&time%3E=" + start.strftime("%Y-%m-%dT%H:%M:%SZ") +
+             "&time%3C=" + now.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    url = ERDDAP + "?" + query
     req = urllib.request.Request(url, headers={"User-Agent": "SurferToday-OSMC-Coverage-Audit/1.0"})
     with urllib.request.urlopen(req, timeout=120) as response:
         raw = response.read().decode("utf-8", "replace")
