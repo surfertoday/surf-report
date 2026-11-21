@@ -2,7 +2,7 @@
   "source": "NOAA National Data Buoy Center (NDBC)",
   "source_metadata": "https://www.ndbc.noaa.gov/activestations.xml",
   "source_realtime_directory": "https://www.ndbc.noaa.gov/data/realtime2/",
-  "generated_at_utc": "2026-11-21T07:12:18+00:00",
+  "generated_at_utc": "2026-11-21T19:18:24+00:00",
   "method": "Active-station XML provides station coordinates. Variable availability is based on numeric, non-missing readings in the last 12 records of each current real-time .txt feed. Spectral .spec availability is recorded separately. This indicates recent observed values, not guaranteed continuous sensor availability.",
   "count": 359,
   "stations": [
