@@ -2,9 +2,9 @@
   "source": "NOAA National Data Buoy Center (NDBC)",
   "source_metadata": "https://www.ndbc.noaa.gov/activestations.xml",
   "source_realtime_directory": "https://www.ndbc.noaa.gov/data/realtime2/",
-  "generated_at_utc": "2026-11-24T09:56:40+00:00",
+  "generated_at_utc": "2026-11-24T22:28:45+00:00",
   "method": "Active-station XML provides station coordinates. Variable availability is based on numeric, non-missing readings in the last 12 records of each current real-time .txt feed. Spectral .spec availability is recorded separately. This indicates recent observed values, not guaranteed continuous sensor availability.",
-  "count": 348,
+  "count": 346,
   "stations": [
     {
       "id": "46078",
@@ -1032,33 +1032,6 @@
       "observations_url": "https://www.ndbc.noaa.gov/data/realtime2/42027.txt"
     },
     {
-      "id": "42028",
-      "name": "C24 - FLRACEP nWFS Buoy, 58m isobath",
-      "owner": "COMPS (University of South Florida)",
-      "latitude": 29.745,
-      "longitude": -86.227,
-      "has_wave_feed": false,
-      "has_significant_wave_height": false,
-      "has_wave_period": false,
-      "has_wave_direction": false,
-      "has_wind_data": true,
-      "has_wind_speed": true,
-      "has_wind_direction": true,
-      "has_wind_gust": true,
-      "wave_variables": [],
-      "wind_variables": [
-        "GST",
-        "WDIR",
-        "WSPD"
-      ],
-      "has_spectral_wave_feed": false,
-      "has_standard_feed": true,
-      "recent_rows_checked": 12,
-      "source": "NOAA NDBC",
-      "station_url": "https://www.ndbc.noaa.gov/station_page.php?station=42028",
-      "observations_url": "https://www.ndbc.noaa.gov/data/realtime2/42028.txt"
-    },
-    {
       "id": "41009",
       "name": "CANAVERAL 20 NM East of Cape Canaveral, FL",
       "owner": "NDBC",
@@ -1394,8 +1367,8 @@
       "id": "46082",
       "name": "Cape Suckling - 35 NM SE of Kayak Is, AK",
       "owner": "NDBC",
-      "latitude": 59.6461,
-      "longitude": -147.956,
+      "latitude": 59.6454,
+      "longitude": -147.957,
       "has_wave_feed": true,
       "has_significant_wave_height": true,
       "has_wave_period": true,
@@ -4464,36 +4437,6 @@
       "source": "NOAA NDBC",
       "station_url": "https://www.ndbc.noaa.gov/station_page.php?station=41110",
       "observations_url": "https://www.ndbc.noaa.gov/data/realtime2/41110.txt"
-    },
-    {
-      "id": "45200",
-      "name": "Maumee Bay Buoy",
-      "owner": "Cleveland Water Alliance",
-      "latitude": 41.724,
-      "longitude": -83.37,
-      "has_wave_feed": true,
-      "has_significant_wave_height": true,
-      "has_wave_period": false,
-      "has_wave_direction": true,
-      "has_wind_data": true,
-      "has_wind_speed": true,
-      "has_wind_direction": true,
-      "has_wind_gust": true,
-      "wave_variables": [
-        "MWD",
-        "WVHT"
-      ],
-      "wind_variables": [
-        "GST",
-        "WDIR",
-        "WSPD"
-      ],
-      "has_spectral_wave_feed": true,
-      "has_standard_feed": true,
-      "recent_rows_checked": 12,
-      "source": "NOAA NDBC",
-      "station_url": "https://www.ndbc.noaa.gov/station_page.php?station=45200",
-      "observations_url": "https://www.ndbc.noaa.gov/data/realtime2/45200.txt"
     },
     {
       "id": "46092",
