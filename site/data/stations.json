@@ -2,7 +2,7 @@
   "source": "NOAA National Data Buoy Center (NDBC)",
   "source_metadata": "https://www.ndbc.noaa.gov/activestations.xml",
   "source_realtime_directory": "https://www.ndbc.noaa.gov/data/realtime2/",
-  "generated_at_utc": "2026-11-26T21:35:17+00:00",
+  "generated_at_utc": "2026-11-27T08:38:17+00:00",
   "method": "Active-station XML provides station coordinates. Variable availability is based on numeric, non-missing readings in the last 12 records of each current real-time .txt feed. Spectral .spec availability is recorded separately. This indicates recent observed values, not guaranteed continuous sensor availability.",
   "count": 345,
   "stations": [
@@ -98,15 +98,17 @@
       "owner": "Chesapeake Bay Interpretive Buoy System (CBIBS)",
       "latitude": 38.963,
       "longitude": -76.448,
-      "has_wave_feed": false,
-      "has_significant_wave_height": false,
+      "has_wave_feed": true,
+      "has_significant_wave_height": true,
       "has_wave_period": false,
       "has_wave_direction": false,
       "has_wind_data": true,
       "has_wind_speed": true,
       "has_wind_direction": true,
       "has_wind_gust": true,
-      "wave_variables": [],
+      "wave_variables": [
+        "WVHT"
+      ],
       "wind_variables": [
         "GST",
         "WDIR",
@@ -848,15 +850,18 @@
       "owner": "Northeastern Regional Association of Coastal Ocean Observing Systems",
       "latitude": 43.497,
       "longitude": -67.876,
-      "has_wave_feed": false,
-      "has_significant_wave_height": false,
-      "has_wave_period": false,
+      "has_wave_feed": true,
+      "has_significant_wave_height": true,
+      "has_wave_period": true,
       "has_wave_direction": false,
       "has_wind_data": true,
       "has_wind_speed": true,
       "has_wind_direction": true,
       "has_wind_gust": true,
-      "wave_variables": [],
+      "wave_variables": [
+        "DPD",
+        "WVHT"
+      ],
       "wind_variables": [
         "GST",
         "WDIR",
@@ -1364,8 +1369,8 @@
       "id": "46082",
       "name": "Cape Suckling - 35 NM SE of Kayak Is, AK",
       "owner": "NDBC",
-      "latitude": 59.6896,
-      "longitude": -148.503,
+      "latitude": 59.7366,
+      "longitude": -148.565,
       "has_wave_feed": true,
       "has_significant_wave_height": true,
       "has_wave_period": true,
@@ -2236,14 +2241,13 @@
       "longitude": -88.212,
       "has_wave_feed": true,
       "has_significant_wave_height": true,
-      "has_wave_period": true,
+      "has_wave_period": false,
       "has_wave_direction": true,
       "has_wind_data": false,
       "has_wind_speed": false,
       "has_wind_direction": false,
       "has_wind_gust": false,
       "wave_variables": [
-        "DPD",
         "MWD",
         "WVHT"
       ],
@@ -5117,19 +5121,14 @@
       "latitude": 48.493,
       "longitude": -124.727,
       "has_wave_feed": true,
-      "has_significant_wave_height": true,
-      "has_wave_period": true,
-      "has_wave_direction": true,
+      "has_significant_wave_height": false,
+      "has_wave_period": false,
+      "has_wave_direction": false,
       "has_wind_data": true,
       "has_wind_speed": true,
       "has_wind_direction": true,
       "has_wind_gust": true,
-      "wave_variables": [
-        "APD",
-        "DPD",
-        "MWD",
-        "WVHT"
-      ],
+      "wave_variables": [],
       "wind_variables": [
         "GST",
         "WDIR",
@@ -6089,15 +6088,13 @@
       "has_wave_feed": true,
       "has_significant_wave_height": true,
       "has_wave_period": true,
-      "has_wave_direction": true,
+      "has_wave_direction": false,
       "has_wind_data": true,
       "has_wind_speed": true,
       "has_wind_direction": true,
       "has_wind_gust": true,
       "wave_variables": [
         "APD",
-        "DPD",
-        "MWD",
         "WVHT"
       ],
       "wind_variables": [
@@ -6147,14 +6144,19 @@
       "latitude": 43.501,
       "longitude": -76.539,
       "has_wave_feed": true,
-      "has_significant_wave_height": false,
-      "has_wave_period": false,
-      "has_wave_direction": false,
+      "has_significant_wave_height": true,
+      "has_wave_period": true,
+      "has_wave_direction": true,
       "has_wind_data": false,
       "has_wind_speed": false,
       "has_wind_direction": false,
       "has_wind_gust": false,
-      "wave_variables": [],
+      "wave_variables": [
+        "APD",
+        "DPD",
+        "MWD",
+        "WVHT"
+      ],
       "wind_variables": [],
       "has_spectral_wave_feed": true,
       "has_standard_feed": true,
@@ -6666,14 +6668,13 @@
       "longitude": -76.335,
       "has_wave_feed": true,
       "has_significant_wave_height": true,
-      "has_wave_period": true,
+      "has_wave_period": false,
       "has_wave_direction": false,
       "has_wind_data": true,
       "has_wind_speed": true,
       "has_wind_direction": true,
       "has_wind_gust": true,
       "wave_variables": [
-        "DPD",
         "WVHT"
       ],
       "wind_variables": [
@@ -9625,7 +9626,7 @@
       "has_wave_direction": true,
       "has_wind_data": true,
       "has_wind_speed": true,
-      "has_wind_direction": false,
+      "has_wind_direction": true,
       "has_wind_gust": true,
       "wave_variables": [
         "APD",
@@ -9635,6 +9636,7 @@
       ],
       "wind_variables": [
         "GST",
+        "WDIR",
         "WSPD"
       ],
       "has_spectral_wave_feed": true,
@@ -9974,14 +9976,13 @@
       "longitude": -76.266,
       "has_wave_feed": true,
       "has_significant_wave_height": true,
-      "has_wave_period": true,
+      "has_wave_period": false,
       "has_wave_direction": false,
       "has_wind_data": true,
       "has_wind_speed": true,
       "has_wind_direction": true,
       "has_wind_gust": true,
       "wave_variables": [
-        "DPD",
         "WVHT"
       ],
       "wind_variables": [
